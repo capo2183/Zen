@@ -11,25 +11,51 @@ public class PenCtrl : MonoBehaviour {
     private const KeyCode UP        = KeyCode.UpArrow;
     private const KeyCode DOWN      = KeyCode.DownArrow;
     private const float   ForceFix  = 0.1f;
-    private const float   IGNORE_FORCE = 0.015f;
-    private const float   CLAMP_FORCE = 1f;
+    public float   IGNORE_FORCE     = 0.015f;
+    public float   CLAMP_FORCE      = 1f;
     #endregion
-
     public Transform m_Pen = null;
+    private Color m_InkColor = new Color(0,0,0);
 
     private float m_fHorizantalForce    = 0f;   //左右
     private float m_fDepthForce         = 0f;   //前後
     private float m_fVerticalForce      = 0f;   //上下垂直
 
-    private float m_fHorizontal    = 0f;   //左右
-    private float m_fDepth         = 0f;   //前後
-    private float m_fVertical      = 0f;   //上下垂直
+    private float m_fHorizontal         = 0f;   //左右
+    private float m_fDepth              = 0f;   //前後
+    private float m_fVertical           = 0f;   //上下垂直
+
+    public float m_fInk                = 1f;
+    public  float GetInk{ get{ return m_fInk; }}
+
+    public MeshRenderer[] m_HairMeshRenderer    = null;
 
 	// Update is called once per frame
-	void Update () {
+	void Update () 
+    {
         ProcessInput();
-        m_Pen.Translate(new Vector3 ( m_fHorizantalForce , m_fVerticalForce ,m_fDepthForce ) * ForceFix);
-	}
+        UpdateInk();
+        ChangeHairColor();
+        Move();
+    }
+
+    private void Move()
+    {
+        m_Pen.Translate(new Vector3 ( m_fHorizantalForce , m_fVerticalForce ,m_fDepthForce ) * ForceFix);        
+    }
+
+    private void UpdateInk()
+    {
+        m_InkColor = new Color( m_fInk , m_fInk , m_fInk );
+    }
+
+    private void ChangeHairColor()
+    {
+        for(int i = 0 ; i < m_HairMeshRenderer.Length ; i++ )
+        {
+            m_HairMeshRenderer[i].material.color =  m_InkColor * (7 - (6 - i));
+        }
+    }
 
     private void ProcessInput()
     {
