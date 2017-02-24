@@ -13,6 +13,8 @@ public class PenCtrl : MonoBehaviour {
     private const float   ForceFix  = 0.1f;
     public float   IGNORE_FORCE     = 0.015f;
     public float   CLAMP_FORCE      = 1f;
+    public float   INK_MAX          = 10f;
+    public float   INK_MIN          = 0f;
     #endregion
     public Transform m_Pen = null;
     private Color m_InkColor = new Color(0,0,0);
@@ -42,11 +44,18 @@ public class PenCtrl : MonoBehaviour {
     private void Move()
     {
         m_Pen.Translate(new Vector3 ( m_fHorizantalForce , m_fVerticalForce ,m_fDepthForce ) * ForceFix);        
+    }        
+
+    private void AddInk( float _fValue )
+    {
+        m_fInk += _fValue;
+        m_fInk = Mathf.Clamp( m_fInk , INK_MIN , INK_MAX );
     }
 
     private void UpdateInk()
     {
-        m_InkColor = new Color( m_fInk , m_fInk , m_fInk );
+        float _fInk = 1f - (m_fInk / INK_MAX );
+        m_InkColor = new Color( _fInk , _fInk , _fInk );
     }
 
     private void ChangeHairColor()
@@ -110,5 +119,17 @@ public class PenCtrl : MonoBehaviour {
         GUI.Label(new Rect(0,0,400,50)," Vertical   = "    + m_fVerticalForce);
         GUI.Label(new Rect(0,25,400,50)," m_fDepthForce = "  + m_fDepthForce);
         GUI.Label(new Rect(0,50,400,50)," Horizantal = "  + m_fHorizantalForce);
+    }
+
+    private void OnCollisionStay(Collision _other)
+    {
+        if (_other.gameObject.tag == "Inkstone")
+        {            
+            Debug.LogError("GetINK");
+            if (m_fInk < INK_MAX)
+            {
+                this.AddInk( _other.gameObject.GetComponent<InkStoneCtrl>().GetInk );
+            }
+        }
     }
 }
