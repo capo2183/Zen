@@ -36,7 +36,7 @@ public class StrokeMesh : MonoBehaviour
 
         StrokePoint sp0 = new StrokePoint();
         sp0.centerPoint = new Vector3(0.0f, 0.0f, 0.0f);
-        sp0.weight = 0.3f;
+        sp0.weight = 0.1f;
         sp0.InitStrokeData();
 
         StrokePoint sp1 = new StrokePoint();
@@ -46,46 +46,75 @@ public class StrokeMesh : MonoBehaviour
 
         StrokePoint sp2 = new StrokePoint();
         sp2.centerPoint = new Vector3(2.0f, 0.0f, 0.0f);
-        sp2.weight = 0.3f;
+        sp2.weight = 0.4f;
         sp2.InitStrokeData();
+        StrokePoint sp3 = new StrokePoint();
+        sp3.centerPoint = new Vector3(3.0f, 0.0f, 0.0f);
+        sp3.weight = 0.45f;
+        sp3.InitStrokeData();
 
-        m_StrokeSkeletonPointAry = new StrokePoint[3] { sp0, sp1, sp2 };
+        StrokePoint sp4 = new StrokePoint();
+        sp4.centerPoint = new Vector3(4.0f, 0.0f, 0.0f);
+        sp4.weight = 0.35f;
+        sp4.InitStrokeData();
 
-        GenerateStorke();
+        StrokePoint sp5 = new StrokePoint();
+        sp5.centerPoint = new Vector3(5.0f, 0.0f, 0.0f);
+        sp5.weight = 0.1f;
+        sp5.InitStrokeData();
+
+        StrokePoint sp6 = new StrokePoint();
+        sp6.centerPoint = new Vector3(0.0f, 0.0f, 0.0f);
+        sp6.weight = 0.3f;
+        sp6.InitStrokeData();
+
+        StrokePoint sp7 = new StrokePoint();
+        sp7.centerPoint = new Vector3(1.0f, 0.0f, 0.0f);
+        sp7.weight = 0.35f;
+        sp7.InitStrokeData();
+
+        StrokePoint sp8 = new StrokePoint();
+        sp8.centerPoint = new Vector3(2.0f, 0.0f, 0.0f);
+        sp8.weight = 0.4f;
+        sp8.InitStrokeData();
+        StrokePoint sp9 = new StrokePoint();
+        sp9.centerPoint = new Vector3(3.0f, 0.0f, 0.0f);
+        sp9.weight = 0.45f;
+        sp9.InitStrokeData();
+        
+
+        m_StrokeSkeletonPointAry = new StrokePoint[10] { sp0, sp1, sp2, sp3, sp4, sp5, sp6, sp7, sp8, sp9 };
+
+        GenerateStorke(m_StrokeSkeletonPointAry);
     }
 
-    private void GenerateStorke()
+    private void GenerateStorke(StrokePoint[] spAry)
     {
-        DrawStrokeBetweenTwoPoint(m_StrokeSkeletonPointAry[0], m_StrokeSkeletonPointAry[1]);
-        DrawStrokeBetweenTwoPoint(m_StrokeSkeletonPointAry[1], m_StrokeSkeletonPointAry[2]);
-    }
-    
-    private void DrawStrokeBetweenTwoPoint(StrokePoint sp0, StrokePoint sp1)
-    {
-        Vector3[] vertices = new Vector3[6];
-
-        vertices[0] = sp0.centerPoint;
-        vertices[1] = sp1.centerPoint;
-        vertices[2] = sp0.upperPoint;
-        vertices[3] = sp1.upperPoint;
-        vertices[4] = sp0.lowerPoint;
-        vertices[5] = sp1.lowerPoint;
-
+        Vector3[] vertices = new Vector3[spAry.Length * 3];
+        for(int i=0; i<spAry.Length; i++)
+        {
+            vertices[3*i]     = spAry[i].centerPoint;
+            vertices[3*i + 1] = spAry[i].upperPoint;
+            vertices[3*i + 2] = spAry[i].lowerPoint;
+        }        
         mesh.vertices = vertices;
-
-        int[] triangles = new int[12];
-        triangles[0] = 0;
-        triangles[1] = 2;
-        triangles[2] = 1;
-        triangles[3] = 1;
-        triangles[4] = 2;
-        triangles[5] = 3;
-        triangles[6] = 0;
-        triangles[7] = 1;
-        triangles[8] = 4;
-        triangles[9] = 4;
-        triangles[10] = 1;
-        triangles[11] = 5;
+        
+        int[] triangles = new int[(spAry.Length - 1) * 12];
+        for (int i = 0; i < spAry.Length-1; i++)
+        {
+            triangles[12*i]        = 3*i + 0;
+            triangles[12*i + 1]    = 3*i + 1;
+            triangles[12*i + 2]    = 3*i + 3;
+            triangles[12*i + 3]    = 3*i + 1;
+            triangles[12*i + 4]    = 3*i + 4;
+            triangles[12*i + 5]    = 3*i + 3;
+            triangles[12*i + 6]    = 3*i + 2;
+            triangles[12*i + 7]    = 3*i + 0;
+            triangles[12*i + 8]    = 3*i + 3;
+            triangles[12*i + 9]    = 3*i + 2;
+            triangles[12*i + 10]   = 3*i + 3;
+            triangles[12 * i + 11] = 3*i + 5;
+        }        
         
         mesh.triangles = triangles;
         mr.material.color = Color.blue;
