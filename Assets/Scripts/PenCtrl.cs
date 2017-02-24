@@ -11,6 +11,8 @@ public class PenCtrl : MonoBehaviour {
     private const KeyCode UP        = KeyCode.UpArrow;
     private const KeyCode DOWN      = KeyCode.DownArrow;
     private const float   ForceFix  = 0.1f;
+    private const float   IGNORE_FORCE = 0.015f;
+    private const float   CLAMP_FORCE = 1f;
     #endregion
 
     public Transform m_Pen = null;
@@ -56,7 +58,25 @@ public class PenCtrl : MonoBehaviour {
         else if (Input.GetKey(DOWN))
         {
             m_fVerticalForce += Input.GetAxis("Depth") * Time.deltaTime;
-        }            
+        }
+
+        IgnoreForce();
+        ClampForce();
+
+    }
+        
+    private void IgnoreForce()
+    {
+        if (Mathf.Abs( m_fDepthForce ) < IGNORE_FORCE) m_fDepthForce = 0f;
+        if (Mathf.Abs( m_fHorizantalForce ) < IGNORE_FORCE) m_fHorizantalForce = 0f;
+        if (Mathf.Abs( m_fVerticalForce ) < IGNORE_FORCE) m_fVerticalForce = 0f;
+    }
+
+    private void ClampForce()
+    {
+        m_fDepthForce       = Mathf.Clamp(m_fDepthForce ,       - CLAMP_FORCE , CLAMP_FORCE);
+        m_fHorizantalForce  = Mathf.Clamp(m_fHorizantalForce,   - CLAMP_FORCE , CLAMP_FORCE);
+        m_fVerticalForce    = Mathf.Clamp(m_fVerticalForce ,    - CLAMP_FORCE , CLAMP_FORCE);
     }
 
     private void OnGUI()
