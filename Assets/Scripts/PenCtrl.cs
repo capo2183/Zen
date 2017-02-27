@@ -27,6 +27,10 @@ public class PenCtrl : MonoBehaviour {
     private float m_fDepth              = 0f;   //前後
     private float m_fVertical           = 0f;   //上下垂直
 
+    public InkOnPaper InkOnPaper;
+    private int inkID;
+    private bool m_bIsWriting = false;
+
     public float m_fInk                = 1f;
     public  float GetInk{ get{ return m_fInk; }}
 
@@ -131,5 +135,22 @@ public class PenCtrl : MonoBehaviour {
                 this.AddInk( _other.gameObject.GetComponent<InkStoneCtrl>().GetInk );
             }
         }
+        else if(_other.gameObject.tag == "Paper")
+        {
+            if (!m_bIsWriting)
+            {
+                inkID = InkOnPaper.CreateStroke();
+                m_bIsWriting = true;
+            }
+            else
+            {
+                InkOnPaper.AddVertex(inkID, _other.contacts[0].point, 0.25f);
+            }
+        }
+    }
+
+    private void OnCollisionExit()
+    {
+        m_bIsWriting = false;
     }
 }

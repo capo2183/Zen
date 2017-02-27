@@ -1,25 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class StrokeMesh : MonoBehaviour
 {
+    [System.Serializable]
     public class StrokePoint
     {
         public Vector3 centerPoint;
+        public float weight;
         public Vector3 upperPoint;
         public Vector3 lowerPoint;
-        public float weight;
-
-        public void InitStrokeData()
-        {
-            upperPoint = centerPoint + new Vector3(0.0f, 0.0f, weight);
-            lowerPoint = centerPoint + new Vector3(0.0f, 0.0f, -weight);
-        }
     }
 
-    public StrokePoint[] m_StrokeSkeletonPointAry;
+    private List<StrokePoint> m_StrokeSkeletonPointList;
+    private StrokePoint[] m_StrokeSkeletonPointAry;
 
     private Mesh mesh;
     private MeshRenderer mr;
@@ -34,62 +30,27 @@ public class StrokeMesh : MonoBehaviour
         mf.mesh = mesh = new Mesh();
         mesh.name = "Procedural Grid";
 
-        StrokePoint sp0 = new StrokePoint();
-        sp0.centerPoint = new Vector3(0.0f, 0.0f, 0.0f);
-        sp0.weight = 0.1f;
-        sp0.InitStrokeData();
+        m_StrokeSkeletonPointList = new List<StrokePoint>();
+    }
 
-        StrokePoint sp1 = new StrokePoint();
-        sp1.centerPoint = new Vector3(1.0f, 0.0f, 0.0f);
-        sp1.weight = 0.35f;
-        sp1.InitStrokeData();
+    public void AddSkeletonVertex(Vector3 _targetPoint, float _weight)
+    {
+        StrokePoint sp = new StrokePoint();
+        sp.centerPoint = _targetPoint;
+        sp.weight = _weight;
+        m_StrokeSkeletonPointList.Add(sp);
+    }
 
-        StrokePoint sp2 = new StrokePoint();
-        sp2.centerPoint = new Vector3(2.0f, 0.0f, 0.0f);
-        sp2.weight = 0.4f;
-        sp2.InitStrokeData();
-        StrokePoint sp3 = new StrokePoint();
-        sp3.centerPoint = new Vector3(3.0f, 0.0f, 0.0f);
-        sp3.weight = 0.45f;
-        sp3.InitStrokeData();
-
-        StrokePoint sp4 = new StrokePoint();
-        sp4.centerPoint = new Vector3(4.0f, 0.0f, 0.0f);
-        sp4.weight = 0.35f;
-        sp4.InitStrokeData();
-
-        StrokePoint sp5 = new StrokePoint();
-        sp5.centerPoint = new Vector3(5.0f, 0.0f, 0.0f);
-        sp5.weight = 0.1f;
-        sp5.InitStrokeData();
-
-        StrokePoint sp6 = new StrokePoint();
-        sp6.centerPoint = new Vector3(0.0f, 0.0f, 0.0f);
-        sp6.weight = 0.3f;
-        sp6.InitStrokeData();
-
-        StrokePoint sp7 = new StrokePoint();
-        sp7.centerPoint = new Vector3(1.0f, 0.0f, 0.0f);
-        sp7.weight = 0.35f;
-        sp7.InitStrokeData();
-
-        StrokePoint sp8 = new StrokePoint();
-        sp8.centerPoint = new Vector3(2.0f, 0.0f, 0.0f);
-        sp8.weight = 0.4f;
-        sp8.InitStrokeData();
-        StrokePoint sp9 = new StrokePoint();
-        sp9.centerPoint = new Vector3(3.0f, 0.0f, 0.0f);
-        sp9.weight = 0.45f;
-        sp9.InitStrokeData();
-        
-
-        m_StrokeSkeletonPointAry = new StrokePoint[10] { sp0, sp1, sp2, sp3, sp4, sp5, sp6, sp7, sp8, sp9 };
-
+    public void Update()
+    {
+        m_StrokeSkeletonPointAry = m_StrokeSkeletonPointList.ToArray();
         GenerateStorke(m_StrokeSkeletonPointAry);
     }
 
     private void GenerateStorke(StrokePoint[] spAry)
     {
+        CalStrokeUpperAndLowerPoint(spAry);
+
         Vector3[] vertices = new Vector3[spAry.Length * 3];
         for(int i=0; i<spAry.Length; i++)
         {
@@ -118,6 +79,35 @@ public class StrokeMesh : MonoBehaviour
         
         mesh.triangles = triangles;
         mr.material.color = Color.blue;
+    }
+
+    private void CalStrokeUpperAndLowerPoint(StrokePoint[] spAry)
+    {
+        Vector3 widthVec = new Vector3(0.0f, 0.0f, 1.0f);
+        Vector3 forward = new Vector3(1.0f, 0.0f, 0.0f);
+        Vector3 upward = new Vector3(0.0f, 1.0f, 0.0f);
+
+        // The first of the point
+        forward = spAry[1].centerPoint - spAry[0].centerPoint;
+        widthVec = Vector3.Cross(upward, forward).normalized;
+        spAry[0].upperPoint = spAry[0].centerPoint - spAry[0].weight * widthVec;
+        spAry[0].lowerPoint = spAry[0].centerPoint + spAry[0].weight * widthVec;
+
+        for (int i=1; i<spAry.Length-1; i++)
+        {
+            StrokePoint prevPoint = spAry[i - 1];
+            StrokePoint currPoint = spAry[i];
+            StrokePoint nextPoint = spAry[i + 1];
+            forward = nextPoint.centerPoint - prevPoint.centerPoint;
+
+            widthVec = Vector3.Cross(upward, forward).normalized;
+            spAry[i].upperPoint = currPoint.centerPoint - currPoint.weight * widthVec;
+            spAry[i].lowerPoint = currPoint.centerPoint + currPoint.weight * widthVec;
+        }
+
+        // The last of the point
+        spAry[spAry.Length-1].upperPoint = spAry[spAry.Length-1].centerPoint - spAry[spAry.Length-1].weight * widthVec;
+        spAry[spAry.Length-1].lowerPoint = spAry[spAry.Length-1].centerPoint + spAry[spAry.Length-1].weight * widthVec;
     }
 
     public void OnDrawGizmos()
