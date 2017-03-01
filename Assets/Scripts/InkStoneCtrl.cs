@@ -3,7 +3,7 @@ using System.Collections;
 
 public class InkStoneCtrl : MonoBehaviour {
 
-    private const float INK_MAX = 20f;
+    private const float INK_MAX = 100f;
     private const float INK_MIN = 0f;
     public float m_fGetInkSpeed = 0.1f;
     public float m_fAddInkSpeed = 0.2f;

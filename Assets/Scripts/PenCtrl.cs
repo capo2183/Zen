@@ -56,6 +56,16 @@ public class PenCtrl : MonoBehaviour {
         m_fInk = Mathf.Clamp( m_fInk , INK_MIN , INK_MAX );
     }
 
+    private bool UseInk()
+    {
+        if (m_fInk > 0f)
+        {
+            m_fInk -= .01f;
+            return true;
+        }
+        return false;
+    }
+
     private void UpdateInk()
     {
         float _fInk = 1f - (m_fInk / INK_MAX );
@@ -137,6 +147,14 @@ public class PenCtrl : MonoBehaviour {
         }
         else if(_other.gameObject.tag == "Paper")
         {
+            this.Writing( _other );
+        }   
+    }
+
+    private void Writing( Collision _target )
+    {
+        if ( UseInk() )
+        {
             if (!m_bIsWriting)
             {
                 inkID = InkOnPaper.CreateStroke();
@@ -144,7 +162,7 @@ public class PenCtrl : MonoBehaviour {
             }
             else
             {
-                InkOnPaper.AddVertex(inkID, _other.contacts[0].point, 0.25f);
+                InkOnPaper.AddVertex(inkID, _target.contacts[0].point, 0.25f);
             }
         }
     }
